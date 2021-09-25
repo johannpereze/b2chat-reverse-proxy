@@ -1,8 +1,14 @@
 const { default: axios } = require("axios");
 const express = require("express");
 const { response, request } = require("express");
+const cors = require('cors');
+
 const app = express();
 require("dotenv").config();
+
+app.use(cors({
+  origin:'*'
+}))
 
 // const API_ENDPOINT = process.env.API_ENDPOINT; //Creo que esto no me sirve como variable de entorno porque lo voy a hacer específico para b2chat y no necesito cambiarlo luego
 
