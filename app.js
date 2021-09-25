@@ -13,6 +13,9 @@ app.use(
   })
 );
 
+//Lectura y parseo del body
+app.use(express.json())
+
 const port = process.env.PORT;
 const LOGIN_HASH = process.env.LOGIN_HASH;
 
@@ -42,34 +45,28 @@ app.post("/oauth/token", (req = request, res = response) => {
 //Endpoint para enviar un mensaje
 app.post("/broadcast", (req = request, res = response) => {
 
-  var data = JSON.stringify({
-    "from": "+573137544892",
-    "to": "+573192161411",
-    "contact_name": "",
-    "template_name": "recordatorio_cita_vigente_3",
-    "campaign_name": "ensayo",
-    "values": [
-      "Johann Sebastian",
-      "Prevenga Caldas",
-      "01/08/2021",
-      "10:00:00",
-      "Juan Camilo Ramos"
-    ]
-  });
+  const b2ChatToken = req.headers.authorization   //headers.lazyUpdate
+  console.log(b2ChatToken);//aquí debo imprimir lo que venga en el body
+  console.log(req.body);
+  const body = req.body;
+  
+
+  var data = JSON.stringify(body);
   
   var config = {
     method: 'post',
     url: 'https://api.b2chat.io/broadcast',
     headers: { 
       'Content-Type': 'application/json', 
-      'Authorization': 'Bearer dc2a5766-90c9-4afb-81e6-060346f1d761'
+      'Authorization': b2ChatToken
     },
     data : data
   };
   
   axios(config)
   .then(function (response) {
-    res.json(response.data);
+    console.log(response.data);
+    res.json(response.data); //no me estaba enviando esta respuesta a la consola del navegador porque fakyaba el .data. Tiraba este error: TypeError: Converting circular structure to JSON
   })
   .catch(function (error) {
     console.log(error);
