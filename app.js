@@ -19,7 +19,7 @@ const LOGIN_HASH = process.env.LOGIN_HASH;
 
 //Podría hacer 2 endpoints. Uno de autenticación y otro de broadcast
 
-app.get("/oauth/token", (req = request, res = response) => {
+app.post("/oauth/token", (req = request, res = response) => {
   //código de postman
   var config = {
     method: "post",
