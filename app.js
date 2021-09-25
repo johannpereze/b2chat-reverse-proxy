@@ -13,20 +13,31 @@ app.use(cors({
 // const API_ENDPOINT = process.env.API_ENDPOINT; //Creo que esto no me sirve como variable de entorno porque lo voy a hacer específico para b2chat y no necesito cambiarlo luego
 
 const port = 8084; //process.env.PORT;
+const LOGIN_HASH = process.env.LOGIN_HASH
 
 //Podría hacer 2 endpoints. Uno de autenticación y otro de broadcast
 
 app.get("/oauth/token", (req = request, res = response) => {
-  //Con esta expresión regular, no importa que ruta envíen siempre y cuando sea una ruta válida :endpoint([\\/\\w\\.-]*)
-  // res.send("Hello world");
 
-  const { grant_type = "client_credentials" } = req.query;
-  axios
-    .get("https://pokeapi.co/api/v2/pokemon-species/4/") //aquí me falta pegarle el grant type. la ur real sería https://api.b2chat.io/oauth/token
+//código de postman
+  var config = {
+    method: 'post',
+    url: 'https://api.b2chat.io/oauth/token?grant_type=client_credentials',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded', 
+      'Authorization': `Basic ${LOGIN_HASH}`
+    }
+  };
+
+
+//Este es el codigo viejo
+  // axios
+  //   .get("https://pokeapi.co/api/v2/pokemon-species/4/") //aquí me falta pegarle el grant type. PONERLE POST. la ur real sería https://api.b2chat.io/oauth/token
+
+
+  axios(config)
     .then((response) => {
-      res.json(response.data.habitat)
-      // console.log(response.data.habitat);
-      console.log("grant_type", grant_type);
+      res.json(response.data)
     })
     .catch((err) => {
       console.log(err);
