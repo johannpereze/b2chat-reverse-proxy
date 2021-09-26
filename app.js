@@ -46,11 +46,11 @@ app.post("/oauth/token", (req = request, res = response) => {
 app.post("/broadcast", (req = request, res = response) => {
   //Obtenemos el token de autotización desde los headers
   const b2ChatToken = req.headers.authorization;
-  console.log(b2ChatToken);
+  // console.log(b2ChatToken);
 
   //Obtenemos el body
   const data = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   var config = {
     method: "post",
@@ -74,5 +74,5 @@ app.post("/broadcast", (req = request, res = response) => {
 
 //Listener
 app.listen(port, () => {
-  console.log(`Listenin on port http://localhost:${port}`);
+  // console.log(`Listenin on port http://localhost:${port}`);
 });
