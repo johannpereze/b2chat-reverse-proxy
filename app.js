@@ -1,6 +1,6 @@
 const { default: axios } = require("axios");
 const express = require("express");
-const { response, request } = require("express");
+const { response, request } = require("express"); //Esto es para tener el tipado de res y req
 const cors = require("cors");
 
 const app = express();
@@ -13,8 +13,9 @@ app.use(
   })
 );
 
-//Lectura y parseo del body
-app.use(express.json())
+//MIDDLEWARES
+//Lectura y parseo del body en POST y PUT
+app.use(express.json());
 
 const port = process.env.PORT;
 const LOGIN_HASH = process.env.LOGIN_HASH;
@@ -23,7 +24,6 @@ const LOGIN_HASH = process.env.LOGIN_HASH;
 
 //Endpoint para obtener el token temporal de b2chat
 app.post("/oauth/token", (req = request, res = response) => {
-
   var config = {
     method: "post",
     url: "https://api.b2chat.io/oauth/token?grant_type=client_credentials",
@@ -44,35 +44,33 @@ app.post("/oauth/token", (req = request, res = response) => {
 
 //Endpoint para enviar un mensaje
 app.post("/broadcast", (req = request, res = response) => {
+  //Obtenemos el token de autotización desde los headers
+  const b2ChatToken = req.headers.authorization;
+  console.log(b2ChatToken);
 
-  const b2ChatToken = req.headers.authorization   //headers.lazyUpdate
-  console.log(b2ChatToken);//aquí debo imprimir lo que venga en el body
+  //Obtenemos el body
+  const data = req.body;
   console.log(req.body);
-  const body = req.body;
-  
 
-  var data = JSON.stringify(body);
-  
   var config = {
-    method: 'post',
-    url: 'https://api.b2chat.io/broadcast',
-    headers: { 
-      'Content-Type': 'application/json', 
-      'Authorization': b2ChatToken
+    method: "post",
+    url: "https://api.b2chat.io/broadcast",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: b2ChatToken,
     },
-    data : data
+    data: data,
   };
-  
-  axios(config)
-  .then(function (response) {
-    console.log(response.data);
-    res.json(response.data); //no me estaba enviando esta respuesta a la consola del navegador porque fakyaba el .data. Tiraba este error: TypeError: Converting circular structure to JSON
-  })
-  .catch(function (error) {
-    console.log(error);
-  });
-});
 
+  axios(config)
+    .then(function (response) {
+      console.log(response.data);
+      res.json(response.data); //no me estaba enviando esta respuesta a la consola del navegador porque falyaba el .data. Tiraba este error: TypeError: Converting circular structure to JSON
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+});
 
 //Listener
 app.listen(port, () => {
