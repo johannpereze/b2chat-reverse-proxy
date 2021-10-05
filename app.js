@@ -1,142 +1,203 @@
-const { default: axios } = require("axios");
-const express = require("express");
-const { response, request } = require("express"); //Esto es para tener el tipado de res y req
-const cors = require("cors");
-const puppeteer = require("puppeteer");
+// const { default: axios } = require("axios");
+// const express = require("express");
+// const { response, request } = require("express"); //Esto es para tener el tipado de res y req
+// const cors = require("cors");
+// const puppeteer = require("puppeteer");
 
-const app = express();
-require("dotenv").config();
+// const app = express();
+// require("dotenv").config();
 
-//Configuración de CORS
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+// //Configuración de CORS
+// app.use(
+//   cors({
+//     origin: "*",
+//   })
+// );
 
-//MIDDLEWARES
-//Lectura y parseo del body en POST y PUT
-app.use(express.json());
+// //MIDDLEWARES
+// //Lectura y parseo del body en POST y PUT
+// app.use(express.json());
 
-const port = process.env.PORT;
-const LOGIN_HASH = process.env.LOGIN_HASH;
-const USERNAME = process.env.USERNAME;
-const PASSWORD = process.env.PASSWORD;
+// const port = process.env.PORT;
+// const LOGIN_HASH = process.env.LOGIN_HASH;
+// const USERNAME = process.env.USERNAME;
+// const PASSWORD = process.env.PASSWORD;
 
-//ENDPOINTS
+// //ENDPOINTS
 
-//Endpoint para obtener el token temporal de b2chat
-app.post("/oauth/token", (req = request, res = response) => {
-  var config = {
-    method: "post",
-    url: "https://api.b2chat.io/oauth/token?grant_type=client_credentials",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${LOGIN_HASH}`,
-    },
-  };
+// //Prueba de conexión
 
-  axios(config)
-    .then((response) => {
-      res.json(response.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+// app.get('/', function (req, res) {
+//   res.send('Hello World')
+// })
 
-//Endpoint para enviar un mensaje
-app.post("/broadcast", (req = request, res = response) => {
-  //Obtenemos el token de autotización desde los headers
-  const b2ChatToken = req.headers.authorization;
-  // console.log(b2ChatToken);
+// //Endpoint para obtener el token temporal de b2chat
+// app.post("/oauth/token", (req = request, res = response) => {
+//   var config = {
+//     method: "post",
+//     url: "https://api.b2chat.io/oauth/token?grant_type=client_credentials",
+//     headers: {
+//       "Content-Type": "application/x-www-form-urlencoded",
+//       Authorization: `Basic ${LOGIN_HASH}`,
+//     },
+//   };
 
-  //Obtenemos el body
-  const data = req.body;
-  // console.log(req.body);
+//   axios(config)
+//     .then((response) => {
+//       res.json(response.data);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
 
-  var config = {
-    method: "post",
-    url: "https://api.b2chat.io/broadcast",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: b2ChatToken,
-    },
-    data: data,
-  };
+// //Endpoint para enviar un mensaje
+// app.post("/broadcast", (req = request, res = response) => {
+//   //Obtenemos el token de autotización desde los headers
+//   const b2ChatToken = req.headers.authorization;
+//   // console.log(b2ChatToken);
 
-  axios(config)
-    .then(function (response) {
-      console.log(response.data);
-      res.json(response.data); //no me estaba enviando esta respuesta a la consola del navegador porque falyaba el .data. Tiraba este error: TypeError: Converting circular structure to JSON
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-});
+//   //Obtenemos el body
+//   const data = req.body;
+//   // console.log(req.body);
 
-//Listener
-app.listen(port, () => {
-  // console.log(`Listenin on port http://localhost:${port}`);
-});
+//   var config = {
+//     method: "post",
+//     url: "https://api.b2chat.io/broadcast",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: b2ChatToken,
+//     },
+//     data: data,
+//   };
 
-//PUPPETEER
+//   axios(config)
+//     .then(function (response) {
+//       console.log(response.data);
+//       res.json(response.data); //no me estaba enviando esta respuesta a la consola del navegador porque falyaba el .data. Tiraba este error: TypeError: Converting circular structure to JSON
+//     })
+//     .catch(function (error) {
+//       console.log(error);
+//     });
+// });
 
-(async () => {
-  console.log('Abriendo Navegador');
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto("https://prevenga.dentalink.cl/sessions/login");
-  await page.waitForSelector('input[name="rut"]');
-  console.log('Tipeando info');
-  await page.type('input[name="rut"]', USERNAME);
-  await page.type('input[name="password"]', PASSWORD);
-  await page.click('input[name="ingresar"]');
-  console.log('ya hice clic y voy a esperar que cargue inicio');
-  await page.waitForSelector("span.dia-text");
-  console.log('Ya cargó el inicio');
-  var titulo = await page.evaluate(() => {
-    console.log('Estoy evaluando la pagina');
-    const dia = document.querySelector("span.dia-text");
-    return dia.innerHTML;
-  });
-  console.log(titulo);
-  // Add a wait for some selector on the home page to load to ensure the next step works correctly
-  await page.pdf({ path: "page.pdf", format: "A4" });
-  await browser.close();
-})();
+// //Listener
+// app.listen(port, () => {
+//   console.log(`Listenin on port http://localhost:${port}`);
+// });
 
-// (async () => {
-//   console.log("lanzamos navegador");
+// //Endpoint para obtener las citas scrapeando dentalink
+// app.get("/getappointments", (req = request, res = response) => {
+//   // const response = getAppointments();
 
+//   res.json({response:'hola mundo'});
+// });
+
+// //PUPPETEER
+
+// const getAppointments = async () => {
+//   //luego que reciba las sedes como argumentos ()
+//   console.log("Abriendo Navegador");
 //   const browser = await puppeteer.launch();
 //   const page = await browser.newPage();
-//   await page.goto("https://prevenga.dentalink.cl/sessions/login", {
-//     waitUntil: "networkidle0",
+//   await page.goto("https://prevenga.dentalink.cl/sessions/login");
+//   await page.waitForSelector('input[name="rut"]');
+//   console.log("Tipeando info");
+//   await page.type('input[name="rut"]', USERNAME);
+//   await page.type('input[name="password"]', PASSWORD);
+//   await page.click(".btn-success");
+//   console.log("ya hice clic y voy a esperar que cargue inicio");
+//   await page.waitForSelector(".appointment");
+
+//   const appointments = await page.evaluate(() => {
+//     const appointmentsElements = document.querySelectorAll(".appointment"); // td.nombre-paciente span.muted
+//     const patientsList = [];
+//     appointmentsElements.forEach((appointment) => {
+//       patientsList.push(appointment.innerText);
+//     });
+//     patientsList.forEach((patient) => {
+//       console.log("Así luce un patient: ", patient);
+//     });
+//     return patientsList;
 //   });
 
-//   // await page.type('[name="rut"]', CREDS.username);
-//   // await page.type('[name="password"]', CREDS.password);
-//   // click and wait for navigation
-//   // await Promise.all([
-//   //   page.click('[name="ingresar"]'),
-//   //   page.waitForNavigation({ waitUntil: "networkidle0" }),
-//   // ]);
+//   console.log(appointments);
 
-//   var titulo = await page.evaluate(() => {
-//     const h2 = document.querySelector("h2");
-//     return h2.innerHTML;
-//   });
-//   console.log(titulo);
-
-//   await Promise.all([
-//     page.click('[name="ingresar"]'),
-//     // page.waitForNavigation({ waitUntil: "networkidle0" }),
-//   ]);
-
-//   console.log("Cerramos navegador");
-
-//   browser.close();
-
+//   await browser.close();
 //   console.log("Navegador cerrado");
-// })();
+// };
+
+// // const info = {
+// //   nombrePaciente:"",
+// //   telefonos:"",
+
+// // }
+
+// // (async () => {
+// //   console.log('Abriendo Navegador');
+// //   const browser = await puppeteer.launch();
+// //   const page = await browser.newPage();
+// //   await page.goto("https://prevenga.dentalink.cl/sessions/login");
+// //   await page.waitForSelector('input[name="rut"]');
+// //   console.log('Tipeando info');
+// //   await page.type('input[name="rut"]', USERNAME);
+// //   await page.type('input[name="password"]', PASSWORD);
+// //   await page.click('input[name="ingresar"]');
+// //   console.log('ya hice clic y voy a esperar que cargue inicio');
+// //   await page.waitForSelector("span.dia-text");
+// //   console.log('Ya cargó el inicio');
+// //   var titulo = await page.evaluate(() => {
+// //     console.log('Estoy evaluando la pagina');
+// //     const dia = document.querySelector("span.dia-text");
+// //     return dia.innerHTML;
+// //   });
+// //   console.log(titulo);
+// //   // Add a wait for some selector on the home page to load to ensure the next step works correctly
+// //   await page.pdf({ path: "page.pdf", format: "A4" });
+// //   await browser.close();
+// // })();
+
+// // (async () => {
+// //   console.log("lanzamos navegador");
+
+// //   const browser = await puppeteer.launch();
+// //   const page = await browser.newPage();
+// //   await page.goto("https://prevenga.dentalink.cl/sessions/login", {
+// //     waitUntil: "networkidle0",
+// //   });
+
+// //   // await page.type('[name="rut"]', CREDS.username);
+// //   // await page.type('[name="password"]', CREDS.password);
+// //   // click and wait for navigation
+// //   // await Promise.all([
+// //   //   page.click('[name="ingresar"]'),
+// //   //   page.waitForNavigation({ waitUntil: "networkidle0" }),
+// //   // ]);
+
+// //   var titulo = await page.evaluate(() => {
+// //     const h2 = document.querySelector("h2");
+// //     return h2.innerHTML;
+// //   });
+// //   console.log(titulo);
+
+// //   await Promise.all([
+// //     page.click('[name="ingresar"]'),
+// //     // page.waitForNavigation({ waitUntil: "networkidle0" }),
+// //   ]);
+
+// //   console.log("Cerramos navegador");
+
+// //   browser.close();
+
+// //   console.log("Navegador cerrado");
+// // })();
+
+
+const express = require('express')
+const app = express()
+ 
+app.get('/', function (req, res) {
+  res.send('Hello World')
+})
+ 
+app.listen(3000)
