@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const express = require("express");
 const { response, request } = require("express"); //Esto es para tener el tipado de res y req
 const cors = require("cors");
+const puppeteer = require("puppeteer");
 
 const app = express();
 require("dotenv").config();
@@ -19,6 +20,8 @@ app.use(express.json());
 
 const port = process.env.PORT;
 const LOGIN_HASH = process.env.LOGIN_HASH;
+const USERNAME = process.env.USERNAME;
+const PASSWORD = process.env.PASSWORD;
 
 //ENDPOINTS
 
@@ -76,3 +79,64 @@ app.post("/broadcast", (req = request, res = response) => {
 app.listen(port, () => {
   // console.log(`Listenin on port http://localhost:${port}`);
 });
+
+//PUPPETEER
+
+(async () => {
+  console.log('Abriendo Navegador');
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto("https://prevenga.dentalink.cl/sessions/login");
+  await page.waitForSelector('input[name="rut"]');
+  console.log('Tipeando info');
+  await page.type('input[name="rut"]', USERNAME);
+  await page.type('input[name="password"]', PASSWORD);
+  await page.click('input[name="ingresar"]');
+  console.log('ya hice clic y voy a esperar que cargue inicio');
+  await page.waitForSelector("span.dia-text");
+  console.log('Ya cargó el inicio');
+  var titulo = await page.evaluate(() => {
+    console.log('Estoy evaluando la pagina');
+    const dia = document.querySelector("span.dia-text");
+    return dia.innerHTML;
+  });
+  console.log(titulo);
+  // Add a wait for some selector on the home page to load to ensure the next step works correctly
+  await page.pdf({ path: "page.pdf", format: "A4" });
+  await browser.close();
+})();
+
+// (async () => {
+//   console.log("lanzamos navegador");
+
+//   const browser = await puppeteer.launch();
+//   const page = await browser.newPage();
+//   await page.goto("https://prevenga.dentalink.cl/sessions/login", {
+//     waitUntil: "networkidle0",
+//   });
+
+//   // await page.type('[name="rut"]', CREDS.username);
+//   // await page.type('[name="password"]', CREDS.password);
+//   // click and wait for navigation
+//   // await Promise.all([
+//   //   page.click('[name="ingresar"]'),
+//   //   page.waitForNavigation({ waitUntil: "networkidle0" }),
+//   // ]);
+
+//   var titulo = await page.evaluate(() => {
+//     const h2 = document.querySelector("h2");
+//     return h2.innerHTML;
+//   });
+//   console.log(titulo);
+
+//   await Promise.all([
+//     page.click('[name="ingresar"]'),
+//     // page.waitForNavigation({ waitUntil: "networkidle0" }),
+//   ]);
+
+//   console.log("Cerramos navegador");
+
+//   browser.close();
+
+//   console.log("Navegador cerrado");
+// })();
