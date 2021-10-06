@@ -82,22 +82,33 @@ app.post("/broadcast", (req = request, res = response) => {
 
 //Listener
 app.listen(port, () => {
-  console.log(`Listenin on port http://localhost:${port}`);
+  console.log(`Listening on port http://localhost:${port}`);
 });
 
 //Endpoint para obtener las citas scrapeando dentalink
 app.get("/getappointments", async (req = request, res = response) => {
   console.log(req.body);
-  const response = await getAppointments(0);
+  // const response = await getAppointments(1); //Aquí paso las sedes que vengan en el body
+  const response = await getResponse(req.body)
+  
   console.log("La response dentro del get: ", response);
   res.json(response);
 });
+
+const getResponse = async (clinics)=>{
+  // const appointmentsList = []
+  const appointments = await clinics.map(async ({id}) => {
+    console.log("Imprimo ID dentro del forEach: ", id);
+    return await getAppointments(id)
+  });
+  return appointments
+}
 
 //PUPPETEER
 
 const getAppointments = async (clinic = 0) => {
   //luego que reciba las sedes como argumentos ()
-  
+
   console.log("Abriendo Navegador");
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -108,10 +119,15 @@ const getAppointments = async (clinic = 0) => {
   await page.type('input[name="password"]', PASSWORD);
   await page.click(".btn-success");
   console.log("ya hice clic y voy a esperar que cargue inicio");
+  await page.waitForSelector(`a[href="/sucursales/set/${clinic}"]`);
+  await page.click('i.fa.fa-fw.fa-home');
+  await page.click(`a[href="/sucursales/set/${clinic}"]`);
+  //TODO: Hacer clic en la sucursal, y ahora sí, esperar a que cargue .appointment
+
   await page.waitForSelector(".appointment");
 
   const appointments = await page.evaluate(() => {
-    const appointmentsElements = document.querySelectorAll(".appointment"); // td.nombre-paciente span.muted
+    const appointmentsElements = document.querySelectorAll(".appointment");
     const patientsList = [];
     appointmentsElements.forEach((appointment) => {
       patientsList.push(appointment.innerText);
