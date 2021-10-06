@@ -26,10 +26,9 @@ const PASSWORD = process.env.PASSWORD;
 //ENDPOINTS
 
 //Prueba de conexión
-
-app.get('/', function (req, res) {
-  res.send('Hello Worldsito')
-})
+app.get("/", function (req, res) {
+  res.send("There is no info in root");
+});
 
 //Endpoint para obtener el token temporal de b2chat
 app.post("/oauth/token", (req = request, res = response) => {
@@ -88,15 +87,17 @@ app.listen(port, () => {
 
 //Endpoint para obtener las citas scrapeando dentalink
 app.get("/getappointments", async (req = request, res = response) => {
-  const response = await getAppointments();
-  console.log('La response dentro del get: ', response)
+  console.log(req.body);
+  const response = await getAppointments(0);
+  console.log("La response dentro del get: ", response);
   res.json(response);
 });
 
 //PUPPETEER
 
-const getAppointments = async () => {
+const getAppointments = async (clinic = 0) => {
   //luego que reciba las sedes como argumentos ()
+  
   console.log("Abriendo Navegador");
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -125,7 +126,7 @@ const getAppointments = async () => {
 
   await browser.close();
   console.log("Navegador cerrado");
-  return appointments
+  return appointments;
 };
 
 // const info = {
@@ -193,12 +194,38 @@ const getAppointments = async () => {
 //   console.log("Navegador cerrado");
 // })();
 
-
 // const express = require('express')
 // const app = express()
- 
+
 // app.get('/', function (req, res) {
 //   res.send('Hello World')
 // })
- 
+
 // app.listen(3000)
+
+const clinics = [
+  { id: 1, nombre: "Prevenga La Ceja" },
+  { id: 2, nombre: "Prevenga Barbosa" },
+  { id: 3, nombre: "Prevenga Itagüí" },
+  { id: 4, nombre: "Prevenga Belén La Villa" },
+  { id: 5, nombre: "Prevenga Sabaneta" },
+  { id: 6, nombre: "Prevenga Prosalco Floresta" },
+  { id: 7, nombre: "Prevenga Éxito San Antonio" },
+  { id: 8, nombre: "Prevenga Caldas" },
+  { id: 9, nombre: "Coopsana Centro" },
+  { id: 10, nombre: "Coopsana Norte" },
+  { id: 11, nombre: "Coopsana Av. Oriental" },
+  { id: 12, nombre: "Coopsana Calasanz" },
+  { id: 13, nombre: "Almacén" },
+  { id: 14, nombre: "Prevenga Bello" },
+  { id: 15, nombre: "Prevenga VIVA Envigado" },
+  { id: 16, nombre: "Prevenga López de Mesa" },
+  { id: 17, nombre: "Videoconsulta" },
+  { id: 18, nombre: "Prevenga La Unión" },
+  { id: 19, nombre: "Prevenga Buenos Aires" },
+  { id: 20, nombre: "Prevenga San Antonio de Prado" },
+  { id: 21, nombre: "Prevenga Caldas Parque" },
+  { id: 22, nombre: "Prevenga El porvenir Rionegro" },
+  { id: 23, nombre: "Insumos Laboratorio" },
+  { id: 24, nombre: "Prevenga El Retiro" },
+];
