@@ -90,9 +90,12 @@ app.get("/getappointments", async (req = request, res = response) => {
   console.log(req.body);
   // const response = await getAppointments(1); //Aquí paso las sedes que vengan en el body
   const response = await getResponse(req.body)
+
+  await Promise.all(response).then(response=>res.json(response))
   
-  console.log("La response dentro del get: ", response);
-  res.json(response);
+  // console.log("La response dentro del get: ", response);
+
+  // res.json(response);
 });
 
 const getResponse = async (clinics)=>{
@@ -101,6 +104,7 @@ const getResponse = async (clinics)=>{
     console.log("Imprimo ID dentro del forEach: ", id);
     return await getAppointments(id)
   });
+  
   return appointments
 }
 
@@ -114,17 +118,19 @@ const getAppointments = async (clinic = 0) => {
   const page = await browser.newPage();
   await page.goto("https://prevenga.dentalink.cl/sessions/login");
   await page.waitForSelector('input[name="rut"]');
-  console.log("Tipeando info");
+  console.log("Tipeando credenciales");
   await page.type('input[name="rut"]', USERNAME);
   await page.type('input[name="password"]', PASSWORD);
   await page.click(".btn-success");
   console.log("ya hice clic y voy a esperar que cargue inicio");
   await page.waitForSelector(`a[href="/sucursales/set/${clinic}"]`);
+  console.log('Haciendo clic en sucursal elegida');
   await page.click('i.fa.fa-fw.fa-home');
   await page.click(`a[href="/sucursales/set/${clinic}"]`);
   //TODO: Hacer clic en la sucursal, y ahora sí, esperar a que cargue .appointment
 
   await page.waitForSelector(".appointment");
+  console.log('Ya cargó mi sucursal, voy a buscar las citas');
 
   const appointments = await page.evaluate(() => {
     const appointmentsElements = document.querySelectorAll(".appointment");
