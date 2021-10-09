@@ -87,27 +87,26 @@ app.listen(port, () => {
 
 //Endpoint para obtener las citas scrapeando dentalink
 app.get("/getappointments", async (req = request, res = response) => {
-  console.clear();
-  console.log(req.body);
-  // const response = await getAppointments(1); //Aquí paso las sedes que vengan en el body
-  const response = await getResponse(req.body);
+  // console.clear();
+  console.log("Params: ", req.query.clinicId);
+  const response = await getAppointments(req.query.clinicId); 
 
-  await Promise.all(response).then((response) => res.json(response));
+  // await Promise.all(response).then((response) => res.json(response));
 
   // console.log("La response dentro del get: ", response);
 
-  // res.json(response);
+  res.json(response);
 });
 
-const getResponse = async (clinics) => {
-  // const appointmentsList = []
-  const appointments = await clinics.map(async ({ id }) => {
-    console.log("Imprimo ID dentro del forEach: ", id);
-    return await getAppointments(id);
-  });
+// const getResponse = async (clinics) => {
+//   // const appointmentsList = []
+//   const appointments = await clinics.map(async ({ id }) => {
+//     console.log("Imprimo ID dentro del forEach: ", id);
+//     return await getAppointments(id);
+//   });
 
-  return appointments;
-};
+//   return appointments;
+// };
 
 //PUPPETEER
 
@@ -121,16 +120,16 @@ const getAppointments = async (clinic = 0) => {
 
   await page.waitForSelector('input[name="rut"]');
   console.log("Tipeando credenciales");
-  await page.type('input[name="rut"]', USERNAME);
+  await page.type('input[name="rut"]', clinic);
   await page.type('input[name="password"]', PASSWORD);
   await page.click(".btn-success");
-  console.log("ya hice clic y voy a esperar que cargue inicio");
-  await page.waitForSelector("i.fa.fa-fw.fa-home");
-  console.log("Haciendo clic en sucursal elegida");
-  await page.click("i.fa.fa-fw.fa-home");
-  await page.waitForSelector(`a[href="/sucursales/set/${clinic}"]`);
-  await page.click(`a[href="/sucursales/set/${clinic}"]`); //siempre falla aquí
-  //TODO: Hacer clic en la sucursal, y ahora sí, esperar a que cargue .appointment
+  console.log("ya hice clic y voy a esperar que cargue la agenda");
+  // await page.waitForSelector("i.fa.fa-fw.fa-home");
+  // console.log("Haciendo clic en sucursal elegida");
+  // await page.click("i.fa.fa-fw.fa-home");
+  // await page.waitForSelector(`a[href="/sucursales/set/${clinic}"]`);
+  // await page.click(`a[href="/sucursales/set/${clinic}"]`); //siempre falla aquí
+  // //TODO: Hacer clic en la sucursal, y ahora sí, esperar a que cargue .appointment
 
   await page.waitForSelector(".appointment");
   console.log("Ya cargó mi sucursal, voy a buscar las citas");
@@ -141,9 +140,9 @@ const getAppointments = async (clinic = 0) => {
     appointmentsElements.forEach((appointment) => {
       patientsList.push(appointment.innerText);
     });
-    patientsList.forEach((patient) => {
-      console.log("Así luce un patient: ", patient);
-    });
+    // patientsList.forEach((patient) => {
+    //   console.log("Así luce un patient: ", patient);
+    // });
     return patientsList;
   });
 
@@ -154,80 +153,8 @@ const getAppointments = async (clinic = 0) => {
   return appointments;
 };
 
-// const info = {
-//   nombrePaciente:"",
-//   telefonos:"",
 
-// }
-
-// (async () => {
-//   console.log('Abriendo Navegador');
-//   const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto("https://prevenga.dentalink.cl/sessions/login");
-//   await page.waitForSelector('input[name="rut"]');
-//   console.log('Tipeando info');
-//   await page.type('input[name="rut"]', USERNAME);
-//   await page.type('input[name="password"]', PASSWORD);
-//   await page.click('input[name="ingresar"]');
-//   console.log('ya hice clic y voy a esperar que cargue inicio');
-//   await page.waitForSelector("span.dia-text");
-//   console.log('Ya cargó el inicio');
-//   var titulo = await page.evaluate(() => {
-//     console.log('Estoy evaluando la pagina');
-//     const dia = document.querySelector("span.dia-text");
-//     return dia.innerHTML;
-//   });
-//   console.log(titulo);
-//   // Add a wait for some selector on the home page to load to ensure the next step works correctly
-//   await page.pdf({ path: "page.pdf", format: "A4" });
-//   await browser.close();
-// })();
-
-// (async () => {
-//   console.log("lanzamos navegador");
-
-//   const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto("https://prevenga.dentalink.cl/sessions/login", {
-//     waitUntil: "networkidle0",
-//   });
-
-//   // await page.type('[name="rut"]', CREDS.username);
-//   // await page.type('[name="password"]', CREDS.password);
-//   // click and wait for navigation
-//   // await Promise.all([
-//   //   page.click('[name="ingresar"]'),
-//   //   page.waitForNavigation({ waitUntil: "networkidle0" }),
-//   // ]);
-
-//   var titulo = await page.evaluate(() => {
-//     const h2 = document.querySelector("h2");
-//     return h2.innerHTML;
-//   });
-//   console.log(titulo);
-
-//   await Promise.all([
-//     page.click('[name="ingresar"]'),
-//     // page.waitForNavigation({ waitUntil: "networkidle0" }),
-//   ]);
-
-//   console.log("Cerramos navegador");
-
-//   browser.close();
-
-//   console.log("Navegador cerrado");
-// })();
-
-// const express = require('express')
-// const app = express()
-
-// app.get('/', function (req, res) {
-//   res.send('Hello World')
-// })
-
-// app.listen(3000)
-
+// puppeteerUser)
 const clinics = [
   { id: 1, nombre: "Prevenga La Ceja" },
   { id: 2, nombre: "Prevenga Barbosa" },
