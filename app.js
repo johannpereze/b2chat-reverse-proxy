@@ -87,7 +87,7 @@ app.listen(port, () => {
 
 //Endpoint para obtener las citas scrapeando dentalink
 app.get("/getappointments", async (req = request, res = response) => {
-  // console.clear();
+  console.clear();
   console.log("Params: ", req.query.clinicId);
   const response = await getAppointments(req.query.clinicId); 
 
@@ -131,14 +131,17 @@ const getAppointments = async (clinic = 0) => {
   // await page.click(`a[href="/sucursales/set/${clinic}"]`); //siempre falla aquí
   // //TODO: Hacer clic en la sucursal, y ahora sí, esperar a que cargue .appointment
 
+  // await page.waitForSelector("td.nombre-paciente");
   await page.waitForSelector(".appointment");
   console.log("Ya cargó mi sucursal, voy a buscar las citas");
 
   const appointments = await page.evaluate(() => {
     const appointmentsElements = document.querySelectorAll(".appointment");
     const patientsList = [];
-    appointmentsElements.forEach((appointment) => {
-      patientsList.push(appointment.innerText);
+    appointmentsElements.forEach((appointment, i) => {
+      // patientsList.push(appointment.innerHTML); //Esta me trae todos los ids que necesito
+      patientsList.push(appointment.textContent);
+      // patientsList.push(appointment.children[1].innerText);
     });
     // patientsList.forEach((patient) => {
     //   console.log("Así luce un patient: ", patient);
